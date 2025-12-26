@@ -157,3 +157,20 @@ function renderResults() {
 
 // Event Listeners
 startBtn.addEventListener('click', startTest);
+
+// 3. Seleção de Elementos (Adicione esta linha junto com as outras seleções)
+const resetBtn = document.getElementById('reset-btn'); 
+
+// ... (mantenha suas funções iguais)
+
+// --- EVENT LISTENERS (Final do arquivo) ---
+
+// Iniciar o teste
+startBtn.addEventListener('click', startTest);
+
+// Finalizar Atendimento (Reseta a página para uma nova avaliação)
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        window.location.reload();
+    });
+}

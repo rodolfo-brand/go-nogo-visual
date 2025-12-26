@@ -3,9 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste Go/No Go</title>
+    <title>Go/No-Go Test - Avaliação Profissional</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+
+    <main id="app-container">
+        <section id="intro-screen" class="screen">
+            <h1 class="main-title">Avaliação Go/No-Go</h1>
+            <button id="start-btn" class="btn-primary">Iniciar Protocolo</button>
+        </section>
+
+        <section id="test-screen" class="screen hidden">
+            <div id="stimulus-display">
+                </div>
+            <div class="quick-instructions">
+                <p>🟢 <strong>ESPAÇO</strong></p>
+                <p>🔴 <strong>NÃO APERTE</strong></p>
+            </div>
+        </section>
+
+        <section id="results-screen" class="screen hidden">
+            <h2 class="results-title">Relatório de Desempenho</h2>
+            <div id="stats-container">
+                </div>
+            <button id="reset-btn" class="btn-secondary">Finalizar Atendimento</button>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>

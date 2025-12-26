@@ -38,3 +38,33 @@ const RAW_SEQUENCE = FULL_SEQUENCE.slice(0, 30);
 // Configurações de tempo (mantendo o padrão do protocolo)
 const STIMULUS_DURATION = 500; //
 const ISI_DURATION = 1500;     //
+
+// Variáveis para guardar os resultados
+let userRecords = [];
+let canRespond = false;
+let responseTimer = null;
+
+// Função que "escuta" o teclado
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space' && canRespond) {
+        handleResponse();
+    }
+});
+
+function handleResponse() {
+    // Se o usuário apertou espaço, não deixamos ele apertar de novo para o mesmo círculo
+    canRespond = false;
+    
+    // Calculamos o tempo de reação
+    const reactionTime = Date.now() - responseTimer;
+    
+    console.log("Apertou Espaço! Tempo:", reactionTime, "ms");
+    
+    // Guardamos o resultado
+    userRecords.push({
+        index: currentIndex,
+        type: RAW_SEQUENCE[currentIndex],
+        correct: RAW_SEQUENCE[currentIndex] === "G", // Acertou se for Verde (Go)
+        reactionTime: reactionTime
+    });
+}

@@ -33,5 +33,58 @@ body {
     display: none !important;
 }
 
+#stimulus-display {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%; /* Transforma o quadrado em círculo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.1s ease; /* Mudança de cor suave */
+}
 
+/* Classes que o JavaScript vai alternar */
+.go-circle {
+    background-color: #22c55e; /* Verde vibrante */
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.4); /* Brilho suave */
+}
+
+.no-go-circle {
+    background-color: #ef4444; /* Vermelho vibrante */
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.4);
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 16px 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background-color: #334155;
+    color: #cbd5e1;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.quick-instructions {
+    margin-top: 20px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 20px;
+}
 

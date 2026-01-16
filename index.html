@@ -3,82 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeuroGo - Avaliação Profissional</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Go / NoGo</title>
     <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body class="no-select">
-
-    <main id="app-container">
-        
-        <section id="intro-screen" class="screen active-screen">
-            <header class="intro-header">
-                <h1 class="main-title">Go/No-Go</h1>
-                <div class="title-underline"></div>
+<body>
+    <main class="container">
+        <section id="screen-intro" class="screen active">
+            <header>
+                <h1 class="title">Go / NoGo</h1>
             </header>
-
-            <div class="instructions-card">
-                <div class="instruction-group">
-                    <div class="instruction-header go-text">
-                        <i data-lucide="target"></i> 
-                        <span>ALVOS (GO)</span>
+            <div class="instructions-box">
+                <div class="main-text">
+                    <p>Durante o teste, você verá um círculo aparecer no centro da tela em duas cores diferentes. Sua tarefa será reagir adequadamente a cada uma delas.</p>
+                </div>
+                <div class="instruction-grid">
+                    <div class="instruction-item">
+                        <div class="circle-icon go"></div>
+                        <div>
+                            <strong>Círculo VERDE</strong>
+                            <p>Aperte <span class="key-badge">ESPAÇO</span> o mais rápido possível.</p>
+                        </div>
                     </div>
-                    <p>Pressione a tecla <strong class="highlight">ESPAÇO</strong> o mais rápido possível quando o círculo <span class="go-circle-text">VERDE</span> aparecer.</p>
-                </div>
-
-                <div class="instruction-group">
-                    <div class="instruction-header nogo-text">
-                        <i data-lucide="alert-circle"></i> 
-                        <span>DISTRATORES (NO-GO)</span>
+                    <div class="instruction-item">
+                        <div class="circle-icon nogo"></div>
+                        <div>
+                            <strong>Círculo VERMELHO</strong>
+                            <p>Não aperte nada. Aguarde ele sumir.</p>
+                        </div>
                     </div>
-                    <p><strong class="highlight">NÃO PRESSIONE</strong> nada quando o círculo <span class="nogo-circle-text">VERMELHO</span> aparecer.</p>
                 </div>
             </div>
-
-            <div class="action-area">
-                <button id="start-btn" class="primary-button">
-                    <i data-lucide="play" class="icon-fill"></i>
-                    <span>Iniciar Teste</span>
-                </button>
-                <p class="helper-text">Pressione ESPAÇO para começar</p>
-            </div>
+            <button id="btn-start" class="btn-primary"><span>▶</span> Iniciar Avaliação</button>
         </section>
 
-        <section id="test-screen" class="screen hidden-screen">
-            <div id="stimulus-display"></div>
-            <div id="focus-cross">
-                <div class="cross-horizontal"></div>
-                <div class="cross-vertical"></div>
-            </div>
+        <section id="screen-test" class="screen hidden">
+            <div id="stimulus-area"></div>
+            <div id="fixation-cross" class="hidden">+</div>
+            <p class="hint">Mantenha o dedo na barra de espaço...</p>
         </section>
 
-        <section id="results-screen" class="screen hidden-screen">
-            <header class="results-header">
-                <h2 class="results-title">RELATÓRIO DE DESEMPENHO</h2>
-                <p class="protocol-label">Protocolo Visual Go/No-Go</p>
-            </header>
-
-            <div id="stats-grid"></div>
-
-            <div class="analysis-card">
-                <div class="analysis-header">
-                    <i data-lucide="activity"></i>
-                    <h3>ANÁLISE DE ERROS</h3>
+        <section id="screen-results" class="screen hidden">
+            <div class="results-header">
+                <h2>📊 Relatório de Performance</h2>
+            </div>
+            <div class="stats-grid">
+                <div class="card">
+                    <span class="card-label">Precisão (Hits)</span>
+                    <span id="res-accuracy" class="card-value">0%</span>
                 </div>
-                <div id="error-details"></div>
+                <div class="card">
+                    <span class="card-label">Tempo Médio</span>
+                    <span id="res-avg-time" class="card-value">0ms</span>
+                </div>
+                <div class="card">
+                    <span class="card-label">Total de Erros</span>
+                    <span id="res-total-errors" class="card-value error-text">0</span>
+                </div>
             </div>
-
-            <button id="reset-btn" class="secondary-button">
-                Finalizar Atendimento
-            </button>
+            <div class="panel">
+                <h3>📈 Tendência do Tempo de Reação</h3>
+                <div id="chart-container" class="chart-box">
+                    <svg id="chart-line-svg"></svg>
+                    <div id="chart-dots-area"></div>
+                </div>
+                <div class="chart-legend">
+                    <span><i class="dot blue"></i> Acerto (Verde)</span>
+                    <span><i class="dot red"></i> Erro (Vermelho)</span>
+                </div>
+            </div>
+            <div class="panel">
+                <h3>📋 Log de Respostas</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Item</th><th>Tipo</th><th>Resultado</th><th class="text-right">Tempo</th></tr>
+                        </thead>
+                        <tbody id="table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <button id="btn-copy" class="btn-primary btn-full"><span>📋</span> Copiar Relatório</button>
         </section>
-
     </main>
-
     <script src="/src/js/script.js"></script>
-    <script>
-        // Inicializa os ícones após o carregamento do DOM
-        lucide.createIcons();
-    </script>
 </body>
 </html>

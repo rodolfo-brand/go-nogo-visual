@@ -1,149 +1,133 @@
-// --- 1. CONFIGURAÇÕES E SEQUÊNCIA ---
-const STIMULUS_DURATION = 500; // Tempo de exibição (ms)
-const ISI_DURATION = 1500;      // Intervalo entre estímulos (ms)
+const CONFIG = { 
+    DURACAO_ESTIMULO: 500, 
+    ISI: 1500, 
+    SEQUENCIA: ["G","G","G","G","N","G","N","G","G","N","G","G","G","G","G","G","N","G","G","G","G","N","G","G","G","G","G","G","N","G"] 
+};
 
-// Sequência oficial de 30 itens
-const RAW_SEQUENCE = [
-    "G","G","G","G","N","G","N","G","G","N",
-    "G","G","G","G","G","G","N","G","G","G",
-    "G","N","G","G","G","G","G","G","N","G"
-];
+let game = { idx: 0, logs: [], active: false, start: 0, reacted: false };
 
-// --- 2. SELEÇÃO DE ELEMENTOS ---
-const introScreen = document.getElementById('intro-screen');
-const testScreen = document.getElementById('test-screen');
-const resultsScreen = document.getElementById('results-screen');
-const stimulusDisplay = document.getElementById('stimulus-display');
-const statsGrid = document.getElementById('stats-grid');
-const errorDetails = document.getElementById('error-details');
+const show = id => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.replace('active', 'hidden'));
+    document.getElementById(id).classList.replace('hidden', 'active');
+};
 
-const startBtn = document.getElementById('start-btn');
-const resetBtn = document.getElementById('reset-btn');
+document.getElementById('btn-start').onclick = () => {
+    game.idx = 0; 
+    game.logs = []; 
+    show('screen-test'); 
+    setTimeout(runCycle, 1500);
+};
 
-// --- 3. ESTADO DO TESTE ---
-let currentIndex = 0;
-let canRespond = false;
-let stimulusStartTime = 0;
-let responseRegistered = false;
-let userRecords = [];
-
-// --- 4. LÓGICA DO TESTE ---
-
-function startTest() {
-    introScreen.classList.add('hidden-screen');
-    testScreen.classList.remove('hidden-screen');
-    testScreen.classList.add('active-screen');
+function runCycle() {
+    if (game.idx >= CONFIG.SEQUENCIA.length) return finish();
     
-    // Pequeno atraso inicial antes do primeiro estímulo
-    setTimeout(nextStimulus, 1000);
-}
+    game.reacted = false; 
+    game.active = true; 
+    game.start = Date.now();
+    
+    const type = CONFIG.SEQUENCIA[game.idx];
+    const area = document.getElementById('stimulus-area');
+    const cruz = document.getElementById('fixation-cross');
+    
+    // Esconde cruz e mostra círculo
+    cruz.classList.add('hidden');
+    area.className = type === 'G' ? 'stimulus-go' : 'stimulus-nogo';
 
-function nextStimulus() {
-    if (currentIndex >= RAW_SEQUENCE.length) {
-        finishTest();
-        return;
-    }
-
-    const currentType = RAW_SEQUENCE[currentIndex];
-    responseRegistered = false;
-    canRespond = true;
-    stimulusStartTime = Date.now();
-
-    // Exibe o estímulo visual
-    stimulusDisplay.className = ''; 
-    stimulusDisplay.classList.add(currentType === "G" ? 'go-circle' : 'nogo-circle');
-
-    // Remove o estímulo após o tempo definido
     setTimeout(() => {
-        stimulusDisplay.className = ''; 
-        canRespond = false;
-
-        // Se o tempo acabou e não houve resposta, registra como omissão ou acerto No-Go
-        if (!responseRegistered) {
-            registerResponse(null);
-        }
-
-        currentIndex++;
-        // Intervalo fixo entre estímulos
-        setTimeout(nextStimulus, ISI_DURATION);
-    }, STIMULUS_DURATION);
+        area.className = ''; 
+        cruz.classList.remove('hidden'); 
+        game.active = false;
+        
+        if (!game.reacted) recordResponse(type, null);
+        
+        game.idx++; 
+        setTimeout(runCycle, CONFIG.ISI);
+    }, CONFIG.DURACAO_ESTIMULO);
 }
 
-// Captura da tecla Espaço
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        // Se estiver na tela inicial, começa o teste
-        if (!introScreen.classList.contains('hidden-screen')) {
-            startTest();
-        } 
-        // Se estiver no teste e puder responder
-        else if (canRespond && !responseRegistered) {
-            registerResponse(Date.now() - stimulusStartTime);
-        }
+window.onkeydown = e => {
+    if (e.code === 'Space' && game.active && !game.reacted) {
+        e.preventDefault(); 
+        game.reacted = true;
+        const rt = Date.now() - game.start;
+        recordResponse(CONFIG.SEQUENCIA[game.idx], rt);
+        document.getElementById('stimulus-area').className = '';
+        document.getElementById('fixation-cross').classList.remove('hidden');
     }
-});
+};
 
-function registerResponse(responseTime) {
-    responseRegistered = true;
-    const type = RAW_SEQUENCE[currentIndex];
+function recordResponse(t, rt) {
+    game.logs.push({ t, rt, ok: rt ? t === 'G' : t === 'N' });
+}
+
+function finish() {
+    show('screen-results');
+    const goItems = game.logs.filter(l => l.t === 'G');
+    const hits = goItems.filter(l => l.rt);
+    const avg = hits.length ? (hits.reduce((a,b) => a + b.rt, 0) / hits.length).toFixed(0) : 0;
     
-    // Lógica de acerto: Apertar no G ou NÃO apertar no N
-    const isCorrect = responseTime !== null ? type === "G" : type === "N";
+    document.getElementById('res-accuracy').innerText = Math.round((hits.length / goItems.length) * 100) + '%';
+    document.getElementById('res-avg-time').innerText = avg + 'ms';
+    document.getElementById('res-total-errors').innerText = game.logs.filter(l => !l.ok).length;
 
-    userRecords.push({
-        type: type,
-        responseTime: responseTime,
-        isCorrect: isCorrect
+    renderChart();
+    
+    document.getElementById('table-body').innerHTML = game.logs.map((l, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td>${l.t==='G'?'🟢 Verde':'🔴 Vermelho'}</td>
+            <td class="${l.ok?'status-ok':'status-error'}">
+                ${l.ok ? (l.rt ? 'Acerto' : 'OK') : (l.rt ? 'Impulso' : 'Omissão')}
+            </td>
+            <td class="text-right">${l.rt ? l.rt + 'ms' : '-'}</td>
+        </tr>`).join('');
+}
+
+function renderChart() {
+    const dotsArea = document.getElementById('chart-dots-area');
+    const svg = document.getElementById('chart-line-svg');
+    dotsArea.innerHTML = '';
+    svg.innerHTML = '';
+    
+    const reactionLogs = game.logs.filter(l => l.rt !== null);
+    if (reactionLogs.length === 0) return;
+
+    const rect = svg.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    const maxRT = Math.max(...reactionLogs.map(l => l.rt), 600); 
+    const points = [];
+
+    reactionLogs.forEach((l, i) => {
+        const x = (i / (reactionLogs.length - 1)) * (w * 0.94) + (w * 0.03);
+        const y = h - ((l.rt / maxRT) * (h * 0.75) + (h * 0.12));
+
+        const dot = document.createElement('div');
+        dot.className = 'chart-dot';
+        dot.style.left = `${x}px`;
+        dot.style.top = `${y}px`;
+        dot.style.background = l.t === 'G' ? 'var(--blue)' : 'var(--red)';
+        dotsArea.appendChild(dot);
+        
+        points.push({x, y});
     });
+
+    if (points.length > 1) {
+        const pathData = `M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}`;
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "rgba(59, 130, 246, 0.4)");
+        path.setAttribute("stroke-width", "2");
+        path.setAttribute("stroke-linecap", "round");
+        svg.appendChild(path);
+    }
 }
 
-// --- 5. RESULTADOS E RELATÓRIO ---
-
-function finishTest() {
-    testScreen.classList.add('hidden-screen');
-    resultsScreen.classList.remove('hidden-screen');
-    resultsScreen.classList.add('active-screen');
-
-    // Cálculos para o relatório
-    const goRecords = userRecords.filter(r => r.type === "G");
-    const nogoRecords = userRecords.filter(r => r.type === "N");
-    
-    const hits = goRecords.filter(r => r.isCorrect).length;
-    const omissionErrors = goRecords.length - hits;
-    const commissionErrors = nogoRecords.filter(r => !r.isCorrect).length;
-    
-    const rtValues = goRecords.filter(r => r.isCorrect).map(r => r.responseTime);
-    const avgRT = rtValues.length > 0 ? (rtValues.reduce((a, b) => a + b, 0) / rtValues.length).toFixed(0) : 0;
-
-    // Renderiza os cards principais
-    statsGrid.innerHTML = `
-        <div class="stat-card">
-            <span class="stat-value" style="color: #22c55e">${hits}/${goRecords.length}</span>
-            <span class="stat-label">Acertos (Go)</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value" style="color: #ef4444">${commissionErrors + omissionErrors}</span>
-            <span class="stat-label">Erros Totais</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value">${avgRT}ms</span>
-            <span class="stat-label">Tempo Médio</span>
-        </div>
-    `;
-
-    // Renderiza análise detalhada de erros
-    errorDetails.innerHTML = `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-            <span>Erros de Comissão (Impulsividade):</span>
-            <span class="nogo-text" style="font-weight: 800">${commissionErrors}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-            <span>Erros de Omissão (Desatenção):</span>
-            <span class="go-text" style="font-weight: 800">${omissionErrors}</span>
-        </div>
-    `;
-}
-
-// Event Listeners dos botões
-startBtn.addEventListener('click', startTest);
-resetBtn.addEventListener('click', () => window.location.reload());
+document.getElementById('btn-copy').onclick = function() {
+    const txt = game.logs.map((l,i) => `${i+1}:${l.ok?'V':'X'}(${l.rt||0}ms)`).join(' | ');
+    navigator.clipboard.writeText("NEUROGO REPORT:\n" + txt);
+    this.innerText = "✓ Copiado!";
+    setTimeout(() => this.innerText = "📋 Copiar Relatório", 2000);
+};

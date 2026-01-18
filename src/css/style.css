@@ -26,7 +26,7 @@ body {
 
 /* --- Instruções --- */
 .title { font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; text-align: center; }
-.instructions-box { background: var(--card); border: 1px solid var(--border); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; }
+.instructions-box { background: var(--card); border: 1px solid var(--border); padding: 3rem; border-radius: 1rem; margin-bottom: 2rem; }
 .main-text { margin-bottom: 1.5rem; color: #cbd5e1; border-bottom: 1px solid var(--border); padding-bottom: 1rem; line-height: 1.6; }
 .instruction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .instruction-item { display: flex; align-items: center; gap: 10px; }
